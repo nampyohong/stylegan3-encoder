@@ -34,16 +34,14 @@ class GradualStyleBlock(torch.nn.Module):
 class GradualStyleEncoder(torch.nn.Module):
     def __init__(self):
         super(GradualStyleEncoder, self).__init__()
-        num_layers, mode = 50, 'ir_se'
-
-        blocks = get_blocks(50)
-        unit_module = bottleneck_IR_SE
+        blocks = get_blocks(50) # num_layers=50
+        unit_module = bottleneck_IR_SE # 'ir_se' bottleneck
 
         self.input_layer = nn.Sequential(
             nn.Conv2d(3, 64, (3, 3), 1, 1, bias=False), 
             nn.BatchNorm2d(64), 
             nn.PReLU(64)
-        )
+        ) # [b,3,256,256]->[b,3,64,64]
 
         modules = []
         for block in blocks:
@@ -53,7 +51,7 @@ class GradualStyleEncoder(torch.nn.Module):
                                            bottleneck.stride))
         self.body = nn.Sequential(*modules)
 
-        self.styles = nn.ModuleList()
+        self.styles = nn.ModuleList() # feat->latent
 
         # TODO: 
         # need some other method for handling w[0]
