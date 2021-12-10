@@ -1,3 +1,8 @@
+*.swp
+*.pth
+*.pkl
+*.dat
+tmp/
 old/
 data/
 stylegan3_encoder.egg-info/
