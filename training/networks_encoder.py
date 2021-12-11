@@ -55,8 +55,10 @@ class GradualStyleEncoder(torch.nn.Module):
 
         # TODO: 
         # need some other method for handling w[0]
+            # train w[0] separately ?
         # coarse_ind, middle_ind tuning
         # apply over-parameterization, residual connection in encoder block
+        # apply truncation
         self.style_count = 16
         self.coarse_ind = 3
         self.middle_ind = 7

@@ -1,3 +1,4 @@
+import copy
 import os
 
 import PIL.Image
@@ -57,8 +58,9 @@ class ImagesDataset(torch.utils.data.Dataset):
         return len(self.paths)
 
     def __getitem__(self, i):
-        pil_img = PIL.Image.open(self.paths[i]).convert('RGB')
-        return self.transforms(pil_img)
+        x = self.transforms(PIL.Image.open(self.paths[i]).convert('RGB'))
+        y = copy.deepcopy(x)
+        return x,y
 
 
 # TODO : implement distributed sampler for ddp

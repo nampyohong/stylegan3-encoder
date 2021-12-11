@@ -8,5 +8,5 @@ if __name__ == '__main__':
     print(f'dataset length: {len(ffhqs_dataset)}')
     print('transforms')
     print(ffhqs_dataset.transforms)
-    print(f'input image shape: {ffhqs_dataset.__getitem__(0).shape}')
+    print(f'input image shape: {ffhqs_dataset.__getitem__(0)[0].shape}')
     print("Done.")
