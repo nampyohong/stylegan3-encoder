@@ -54,7 +54,7 @@ def training_loop(
     val_steps               = 1000,     # Validation batch steps 
     print_steps             = 50,       # How often to print logs
     tensorboard_steps       = 50,       # How often to log to tensorboard?
-    image_snapshot_steps    = 50,       # How often to save image snapshots? None=disable.
+    image_snapshot_steps    = 100,       # How often to save image snapshots? None=disable.
     network_snapshot_steps  = 1000,     # How often to save network snapshots?
     cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
 ):
