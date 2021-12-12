@@ -3,6 +3,7 @@
 *.pkl
 *.dat
 tmp/
+exp/
 old/
 data/
 stylegan3_encoder.egg-info/

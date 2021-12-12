@@ -22,9 +22,13 @@ from training.ranger import Ranger
 #----------------------------------------------------------------------------
 
 def training_loop(
+    run_dir         = '.',      # Output directory.
     rank            = 0,        # Rank of the current process in [0, num_gpus].
     num_gpus        = 1,        # Number of GPUs participating in the training.
     learning_rate   = 0.001,    # Learning rate
+    lambda1         = 1.0,      # L2 loss multiplier factor
+    lambda2         = 0.8,      # LPIPS loss multiplier factor
+    lambda3         = 0.1,      # ID loss multiplier factor
     batch_size      = 32,       # Total batch size for one training iteration. Can be larger than batch_gpu * num_gpus.
     batch_gpu       = 4,        # Number of samples processed at a time by one GPU.
     random_seed     = 0,        # Global random seed.
@@ -49,7 +53,9 @@ def training_loop(
     # Load training set.
     if rank == 0:
         print('Loading training set...')
-    dataset_dir = 'data/ffhqs'
+    # TODO : set dataset_type from config
+    dataset_type = 'ffhqs'
+    dataset_dir = f'data/{dataset_type}'
     training_set = ImagesDataset(dataset_dir, mode='train')
     training_set_sampler = misc.InfiniteSampler(dataset=training_set, rank=rank, num_replicas=num_gpus, seed=random_seed)
     training_loader = torch.utils.data.DataLoader(dataset=training_set, sampler=training_set_sampler, batch_size=batch_size//num_gpus, num_workers=num_workers)
@@ -87,7 +93,13 @@ def training_loop(
     E.train()
     G.eval()
 
-    training_steps = 10 # FIXME for test
+    # for test
+    # TODO: get these setting from config
+    training_steps = 20 # FIXME
+    image_save_steps = 10 # FIXME
+    weight_save_steps = 10 # FIXME
+    tensorboard_steps = 5 # FIXME
+
     while cur_step < training_steps:
         for batch_idx, batch in enumerate(training_loader):
             optimizer.zero_grad()
@@ -125,8 +137,9 @@ def training_loop(
             if cur_step == training_steps:
                 break
 
-    # Save image snapshot.
-    # Save network snapshot.
+            # Save image snapshot.
+            # Save network snapshot.
+
     # Done.
     torch.distributed.destroy_process_group()
 

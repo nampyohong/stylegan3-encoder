@@ -1,5 +1,5 @@
 python train.py \
-    --outdir exp \
+    --outdir exp/test \
     --cfg base \
     --data data/ffhqs \
     --gpus 2 \

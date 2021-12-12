@@ -1,7 +1,9 @@
 """Train stylegan3 encoder"""
 
+import json
 import os
 import random
+import re
 import tempfile
 
 import click
@@ -37,26 +39,46 @@ from torch_utils import custom_ops
 def main(**kwargs):
     """
     """
-
     # Initialize config.
     opts = dnnlib.EasyDict(kwargs) # Command line arguments.
     c = dnnlib.EasyDict() # Main config dict.
     c.num_gpus = opts.gpus
     c.learning_rate = opts.lr
+    c.lambda1 = opts.l2_lambda
+    c.lambda2 = opts.lpips_lambda
+    c.lambda3 = opts.id_lambda
     c.batch_size = opts.batch
     c.batch_gpu = opts.batch // opts.gpus
     c.random_seed = opts.seed
     c.num_workers = opts.workers
 
-    # Set random seed for reproducability
-    random.seed(opts.seed)
-    np.random.seed(opts.seed)
-    torch.manual_seed(opts.seed)
-    torch.cuda.manual_seed(opts.seed)
-    torch.cuda.manual_seed_all(opts.seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
+    # Description string.
+    dataset_name = opts.data.split('/')[-1]
+    desc = f'{opts.cfg:s}-{dataset_name:s}-gpus{c.num_gpus:d}-batch{c.batch_size:d}'
 
+    # Pick output directory.
+    prev_run_dirs = []
+    if os.path.isdir(opts.outdir):
+        prev_run_dirs = [x for x in os.listdir(opts.outdir) if os.path.isdir(os.path.join(opts.outdir, x))]
+    prev_run_ids = [re.match(r'^\d+', x) for x in prev_run_dirs]
+    prev_run_ids = [int(x.group()) for x in prev_run_ids if x is not None]
+    cur_run_id = max(prev_run_ids, default=-1) + 1
+    c.run_dir = os.path.join(opts.outdir, f'{cur_run_id:05}-{desc}')
+    assert not os.path.exists(c.run_dir)
+
+    # Print options.
+    print()
+    print('Training options:')
+    print(json.dumps(c, indent=2))
+    print()
+
+    # Create output directory.
+    print('')
+    os.makedirs(c.run_dir)
+    with open(os.path.join(c.run_dir, 'training_options.json'), 'wt') as f:
+        json.dump(c, f, indent=2)
+
+    # Launch processes.
     print('Launching processes...')
     torch.multiprocessing.set_start_method('spawn')
     with tempfile.TemporaryDirectory() as temp_dir:

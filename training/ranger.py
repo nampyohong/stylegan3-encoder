@@ -120,9 +120,11 @@ class Ranger(Optimizer):
 				state['step'] += 1
 
 				# compute variance mov avg
-				exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+				#exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+				exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1-beta2)
 				# compute mean moving avg
-				exp_avg.mul_(beta1).add_(1 - beta1, grad)
+				#exp_avg.mul_(beta1).add_(1 - beta1, grad)
+				exp_avg.mul_(beta1).add_(grad, alpha=1-beta1)
 
 				buffered = self.radam_buffer[int(state['step'] % 10)]
 
@@ -148,9 +150,11 @@ class Ranger(Optimizer):
 				# apply lr
 				if N_sma > self.N_sma_threshhold:
 					denom = exp_avg_sq.sqrt().add_(group['eps'])
-					p_data_fp32.addcdiv_(-step_size * group['lr'], exp_avg, denom)
+					#p_data_fp32.addcdiv_(-step_size * group['lr'], exp_avg, denom)
+					p_data_fp32.addcdiv_(exp_avg, denom, value=-step_size * group['lr'])
 				else:
-					p_data_fp32.add_(-step_size * group['lr'], exp_avg)
+					#p_data_fp32.add_(-step_size * group['lr'], exp_avg)
+					p_data_fp32.add_(exp_avg, alpha=-step_size * group['lr'])
 
 				p.data.copy_(p_data_fp32)
 
@@ -158,7 +162,8 @@ class Ranger(Optimizer):
 				# we do it at the param level instead of group level
 				if state['step'] % group['k'] == 0:
 					slow_p = state['slow_buffer']  # get access to slow param tensor
-					slow_p.add_(self.alpha, p.data - slow_p)  # (fast weights - slow weights) * alpha
+					#slow_p.add_(self.alpha, p.data - slow_p)  # (fast weights - slow weights) * alpha
+					slow_p.add_(p.data - slow_p,alpha=self.alpha)  # (fast weights - slow weights) * alpha
 					p.data.copy_(slow_p)  # copy interpolated weights to RAdam param tensor
 
 		return loss
