@@ -25,7 +25,6 @@ from torch_utils import custom_ops
 @click.option('--data',         help='Training data', metavar='[DIR]',                type=str, required=True)
 @click.option('--gpus',         help='Number of GPUs to use', metavar='INT',          type=click.IntRange(min=1), required=True)
 @click.option('--batch',        help='Total batch size', metavar='INT',               type=click.IntRange(min=1), required=True)
-#@click.option('--local_rank',   help='Local rank', metavar='INT',                     type=click.IntRange(min=0), required=True)
 
 # Optional features.
 @click.option('--lr',           help='Learning rate', metavar='FLOAT',                type=click.FloatRange(min=0), default=0.001, show_default=True)
@@ -73,7 +72,7 @@ def main(**kwargs):
     print()
 
     # Create output directory.
-    print('')
+    print('Creating output directory...')
     os.makedirs(c.run_dir)
     with open(os.path.join(c.run_dir, 'training_options.json'), 'wt') as f:
         json.dump(c, f, indent=2)

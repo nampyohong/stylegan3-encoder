@@ -1,8 +1,6 @@
 python train.py \
-    --outdir exp/test \
+    --outdir exp/base \
     --cfg base \
-    --data data/ffhqs \
-    --gpus 2 \
-    --batch 8 \
-#--gpus 8 \
-#--batch 32 \
+    --data data/ffhq \
+    --gpus 8 \
+    --batch 32 \
