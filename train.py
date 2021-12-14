@@ -74,6 +74,8 @@ def main(**kwargs):
     # Create output directory.
     print('Creating output directory...')
     os.makedirs(c.run_dir)
+    os.makedirs(f'{c.run_dir}/image_snapshots/')
+    os.makedirs(f'{c.run_dir}/network_snapshots/')
     with open(os.path.join(c.run_dir, 'training_options.json'), 'wt') as f:
         json.dump(c, f, indent=2)
 

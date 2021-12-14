@@ -6,10 +6,14 @@
 
 ## Installation
 ### Docker build
-`$ sh build_img.sh`
-`$ sh build_container.sh [container-name]`
+```
+$ sh build_img.sh
+$ sh build_container.sh [container-name]
+```
 
 ### Install package
-`$ docker start [container-name]`
-`$ docker attach [container-name]`
-`$ pip install -v -e .`
+```
+$ docker start [container-name]
+$ docker attach [container-name]
+$ pip install -v -e .
+```

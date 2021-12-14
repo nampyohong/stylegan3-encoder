@@ -50,12 +50,12 @@ def training_loop(
     random_seed             = 0,        # Global random seed.
     num_workers             = 3,        # Dataloader workers.
     resume_pkl              = None,     # Network pickle to resume training from.
-    training_steps          = 500000,   # Total training batch steps
+    training_steps          = 75000,    # Total training batch steps
     val_steps               = 1000,     # Validation batch steps 
     print_steps             = 50,       # How often to print logs
     tensorboard_steps       = 50,       # How often to log to tensorboard?
-    image_snapshot_steps    = 100,       # How often to save image snapshots? None=disable.
-    network_snapshot_steps  = 1000,     # How often to save network snapshots?
+    image_snapshot_steps    = 1000,     # How often to save image snapshots? None=disable.
+    network_snapshot_steps  = 5000,     # How often to save network snapshots?
     cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
 ):
 
@@ -125,23 +125,22 @@ def training_loop(
             optimizer.zero_grad()
             # x:source image = y:real image
             # E(x): w, encoded latent
-            # G(E(x)):generated_images
+            # G.synthesis(E(x)):encoded_images
             x,y = batch 
             x,real_images = x.to(device),y.to(device)
-            w = E(x)
             face_pool=torch.nn.AdaptiveAvgPool2d((256,256))
-            generated_images = face_pool(G.synthesis(E(x)))
+            encoded_images = face_pool(G.synthesis(E(x)))
             
             # get loss
             loss = 0.0
             loss_dict = {} # for tb logs
-            loss_l2 = l2_loss(generated_images, real_images)
+            loss_l2 = l2_loss(encoded_images, real_images)
             loss_dict['l2'] = loss_l2.item()
             loss += loss_l2 * lambda1
-            loss_lpips = lpips_loss(generated_images, real_images).squeeze().mean()
+            loss_lpips = lpips_loss(encoded_images, real_images).squeeze().mean()
             loss_dict['lpips'] = loss_lpips.item()
             loss += loss_lpips * lambda2
-            loss_id, sim_improvement = id_loss(generated_images, real_images, x)
+            loss_id, sim_improvement = id_loss(encoded_images, real_images, x)
             loss_dict['id'] = loss_id.item()
             loss_dict['id_improve'] = sim_improvement
             loss += loss_id * lambda3
@@ -165,12 +164,12 @@ def training_loop(
                 gh, gw = 1, batch_gpu
                 H,W = real_images.shape[2], real_images.shape[3]
                 real_path = f'image-snapshot-real-{cur_step:06d}.png'
-                generated_path = f'image-snapshot-generated-{cur_step:06d}.png'
-                save_image(real_images, os.path.join(run_dir, real_path), gh, gw, H, W)
-                save_image(generated_images, os.path.join(run_dir, generated_path), gh, gw, H, W)
+                encoded_path = f'image-snapshot-encoded-{cur_step:06d}.png'
+                save_image(real_images, os.path.join(run_dir, 'image_snapshots', real_path), gh, gw, H, W)
+                save_image(encoded_images, os.path.join(run_dir, 'image_snapshots', encoded_path), gh, gw, H, W)
 
             # Save network snapshot.
-            network_pkl = None
+            snapshot_pkl = None
             snapshot_data = None
             if rank == 0 and cur_step % network_snapshot_steps == 0:
                 print(f"Saving netowrk snapshot at step {cur_step}...")
@@ -178,13 +177,9 @@ def training_loop(
                 for key, value in snapshot_data.items():
                     if isinstance(value, torch.nn.Module):
                         value = copy.deepcopy(value).eval().requires_grad_(False)
-#                        if num_gpus > 1:
-#                            misc.check_ddp_consistency(value, ignore_regex=r'.*\.[^.]+_(avg|ema)')
-#                            for param in misc.params_and_buffers(value):
-#                                torch.distributed.broadcast(param, src=0)
                         snapshot_data[key] = value.cpu()
                     del value # conserve memory
-                snapshot_pkl = os.path.join(run_dir, f'network-snapshot-{cur_step:06d}.pkl')
+                snapshot_pkl = os.path.join(run_dir, 'network_snapshots',f'network-snapshot-{cur_step:06d}.pkl')
                 with open(snapshot_pkl, 'wb') as f:
                     pickle.dump(snapshot_data, f)
             del snapshot_data # conserve memory
