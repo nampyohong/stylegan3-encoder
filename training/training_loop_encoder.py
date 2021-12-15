@@ -50,8 +50,8 @@ def training_loop(
     random_seed             = 0,        # Global random seed.
     num_workers             = 3,        # Dataloader workers.
     resume_pkl              = None,     # Network pickle to resume training from.
-    training_steps          = 75000,    # Total training batch steps
-    val_steps               = 1000,     # Validation batch steps 
+    training_steps          = 100001,   # Total training batch steps
+    val_steps               = 5000,     # Validation batch steps 
     print_steps             = 50,       # How often to print logs
     tensorboard_steps       = 50,       # How often to log to tensorboard?
     image_snapshot_steps    = 1000,     # How often to save image snapshots? None=disable.
