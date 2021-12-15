@@ -36,7 +36,7 @@ from torch_utils import custom_ops
 
 
 def main(**kwargs):
-    """
+    """Main training script
     """
     # Initialize config.
     opts = dnnlib.EasyDict(kwargs) # Command line arguments.

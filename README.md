@@ -1,8 +1,9 @@
 # stylegan3-encoder
 
-## References
-1. [stylegan3](https://github.com/NVlabs/stylegan3)
-2. [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel)
+## Introduction
+Encoder implementation for image inversion task of stylegan3 generator ([Alias Free GAN](https://github.com/NVlabs/stylegan3)).  
+The neural network architecture and hyper-parameter settings of the base configuration is almost the same as that of [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel), and various settings of improved encoder architecture will be added in the future.  
+And for fast training, pytorch DistibutedDataParallel is used.  
 
 ## Installation
 
@@ -58,7 +59,7 @@ python train.py \
 ![idloss](./imgs/train_id.png)
 ![idimprove](./imgs/train_id_improve.png)
 
-**Trainset examples**
+**Trainset examples**  
 Real image batch X
 ![real1](./imgs/real_batch_1.png)
 ![real2](./imgs/real_batch_2.png)
@@ -68,9 +69,10 @@ Encoded image batch G.synthesis(E(X))
 ![encoded2](./imgs/encoded_batch_2.png)
 ![encoded3](./imgs/encoded_batch_3.png)
 
-**Encoder checkpoint** will be available in few days
+**Encoder checkpoint**  
+will be available in few days
 
-### TODO
+## TODO
  - [ ] Implement demo script
  - [ ] Refactoring configuration system
  - [ ] Implement resume checkpoint
