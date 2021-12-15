@@ -6,8 +6,8 @@
 
 ## Installation
 
-### GPU info
-* GeForce RTX 3090 x8
+### GPU and NVIDIA driver info
+* GeForce RTX 3090 x 8
 * NVIDIA driver version: 460.91.03
 
 ### Docker build
@@ -68,8 +68,7 @@ Encoded image batch G.synthesis(E(X))
 ![encoded2](./imgs/encoded_batch_2.png)
 ![encoded3](./imgs/encoded_batch_3.png)
 
-**Encoder checkpoint**
-Encoder checkpoints download will be available in few days
+**Encoder checkpoint** will be available in few days
 
 ### TODO
  - [ ] Implement demo script
@@ -79,7 +78,7 @@ Encoder checkpoints download will be available in few days
  - [ ] Fix legacy script to handle encoder snapshot pkl
  - [ ] Train encoder for stylegan3-r generator
  - [ ] Model architecture over parametrization using [Transformer](https://arxiv.org/abs/1706.03762)
- - [ ] Apply L2 delta-regularization loss and GAN loss(latent discriminator) [e4e](https://arxiv.org/abs/2102.02766)
+ - [ ] Apply L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
  - [ ] Apply [hyperstyle](https://github.com/yuval-alaluf/hyperstyle)
 
 ## References
