@@ -20,19 +20,42 @@ from torch_utils import custom_ops
 @click.command()
 
 # Required.
-@click.option('--outdir',       help='Where to save the results', metavar='DIR',      required=True)
-@click.option('--cfg',          help='Base configuration',                            type=click.Choice(['base']), required=True)
-@click.option('--data',         help='Training data', metavar='[DIR]',                type=str, required=True)
-@click.option('--gpus',         help='Number of GPUs to use', metavar='INT',          type=click.IntRange(min=1), required=True)
-@click.option('--batch',        help='Total batch size', metavar='INT',               type=click.IntRange(min=1), required=True)
+@click.option('--outdir',           help='Where to save the results', metavar='DIR',        required=True)
+@click.option('--encoder',          help='Encoder architecture type',                       type=click.Choice(['base','config-a','config-b','config-c']), required=True)
+# TODO
+# config-a : use feature that can present more entire image in w[0]
+# config-b : add transformer after forwarding each gradual style block (over-parametrization)
+# config-c : apply continuous signal interpretation
+@click.option('--data',             help='Training data', metavar='[DIR]',                  type=str, required=True)
+@click.option('--gpus',             help='Number of GPUs to use', metavar='INT',            type=click.IntRange(min=1), required=True)
+@click.option('--batch',            help='Total batch size', metavar='INT',                 type=click.IntRange(min=1), required=True)
+@click.option('--generator',        help='Generator pickle to encode',                      required=True) 
 
-# Optional features.
-@click.option('--lr',           help='Learning rate', metavar='FLOAT',                type=click.FloatRange(min=0), default=0.001, show_default=True)
-@click.option('--l2_lambda',    help='L2 loss multiplier factor', metavar='FLOAT',    type=click.FloatRange(min=0), default=1.0, show_default=True)
-@click.option('--lpips_lambda', help='LPIPS loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.8, show_default=True)
-@click.option('--id_lambda',    help='ID loss multiplier factor', metavar='FLOAT',    type=click.FloatRange(min=0), default=0.1, show_default=True)
-@click.option('--seed',         help='Random seed', metavar='INT',                    type=click.IntRange(min=0), default=0, show_default=True)
-@click.option('--workers',      help='DataLoader worker processes', metavar='INT',    type=click.IntRange(min=1), default=3, show_default=True)
+# Training, logging batch steps
+@click.option('--training_steps',   help='Total training steps',                            type=click.IntRange(min=1), default=100001)
+@click.option('--val_steps',        help='Validation batch steps',                          type=click.IntRange(min=1), default=5000)
+@click.option('--print_steps',      help='How often to print logs',                         type=click.IntRange(min=1), default=5000)
+@click.option('--tb_steps',         help='How often to log to tensorboard?',                type=click.IntRange(min=1), default=5000)
+@click.option('--img_snshot_steps', help='How often to save image snapshots?',              type=click.IntRange(min=1), default=5000)
+@click.option('--net_snshot_steps', help='How often to save network snapshots?',            type=click.IntRange(min=1), default=5000)
+
+# Define Loss
+@click.option('--lr',           help='Learning rate', metavar='FLOAT',                  type=click.FloatRange(min=0), default=0.001, show_default=True)
+@click.option('--l2_lambda',    help='L2 loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=1.0, show_default=True)
+@click.option('--lpips_lambda', help='LPIPS loss multiplier factor', metavar='FLOAT',   type=click.FloatRange(min=0), default=0.8, show_default=True)
+@click.option('--id_lambda',    help='ID loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=0.1, show_default=True)
+@click.option('--reg_lambda',   help='e4e reg loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
+@click.option('--gan_lambda',   help='e4e gan loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
+@click.option('--edit_lambda',  help='e4e editability lambda', metavar='FLOAT',         type=click.FloatRange(min=0), default=0.0, show_default=True)
+
+# Reproducibility
+@click.option('--seed',         help='Random seed', metavar='INT',                      type=click.IntRange(min=0), default=0, show_default=True)
+
+# Dataloader workers
+@click.option('--workers',      help='DataLoader worker processes', metavar='INT',      type=click.IntRange(min=1), default=3, show_default=True)
+
+# Resume
+@click.option('--resume_pkl',   help='Network pickle to resume training',               default=None, show_default=True)
 
 
 def main(**kwargs):
@@ -41,19 +64,37 @@ def main(**kwargs):
     # Initialize config.
     opts = dnnlib.EasyDict(kwargs) # Command line arguments.
     c = dnnlib.EasyDict() # Main config dict.
+
+    c.model_architecture = opts.encoder
+    c.dataset_dir = opts.data
     c.num_gpus = opts.gpus
-    c.learning_rate = opts.lr
-    c.lambda1 = opts.l2_lambda
-    c.lambda2 = opts.lpips_lambda
-    c.lambda3 = opts.id_lambda
     c.batch_size = opts.batch
     c.batch_gpu = opts.batch // opts.gpus
+    c.generator_pkl = opts.generator
+
+    c.training_steps = opts.training_steps
+    c.val_steps = opts.val_steps
+    c.print_steps = opts.print_steps
+    c.tensorboard_steps = opts.tb_steps
+    c.image_snapshot_steps = opts.img_snshot_steps
+    c.network_snapshot_steps = opts.net_snshot_steps
+
+    c.learning_rate = opts.lr
+    c.l2_lambda = opts.l2_lambda
+    c.lpips_lambda = opts.lpips_lambda
+    c.id_lambda = opts.id_lambda
+    c.reg_lambda = opts.reg_lambda
+    c.gan_lambda = opts.gan_lambda
+    c.edit_lambda = opts.edit_lambda
+
     c.random_seed = opts.seed
     c.num_workers = opts.workers
+    c.resume_pkl = opts.resume_pkl
 
     # Description string.
-    dataset_name = opts.data.split('/')[-1]
-    desc = f'{opts.cfg:s}-{dataset_name:s}-gpus{c.num_gpus:d}-batch{c.batch_size:d}'
+    dataset_name = c.dataset_dir.split('/')[-1]
+    desc = f'{c.model_architecture:s}-{dataset_name:s}-gpus{c.num_gpus:d}-batch{c.batch_size:d}'
+    # TODO: add resume related description
 
     # Pick output directory.
     prev_run_dirs = []
