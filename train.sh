@@ -4,4 +4,4 @@ python train.py \
     --data data/ffhq \
     --gpus 8 \
     --batch 32 \
-    --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl
+    --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \

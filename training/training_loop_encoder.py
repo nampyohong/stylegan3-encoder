@@ -38,31 +38,32 @@ def save_image(images, save_path, gh, gw, H, W):
 #----------------------------------------------------------------------------
 
 def training_loop(
-    run_dir                 = '.',      # Output directory.
-    rank                    = 0,        # Rank of the current process in [0, num_gpus].
-    model_architecture      = 'base',   # Model architecture type, ['base', 'config-a', 'config-b', 'config-c']
-    dataset_dir             = 'ffhq',   # Train dataset directory
-    num_gpus                = 1,        # Number of GPUs participating in the training.
-    batch_size              = 32,       # Total batch size for one training iteration. Can be larger than batch_gpu * num_gpus.
-    batch_gpu               = 4,        # Number of samples processed at a time by one GPU.
-    generator_pkl           = None,     # Generator pickle to encode.
-    training_steps          = 100001,   # Total training batch steps
-    val_steps               = 5000,     # Validation batch steps 
-    print_steps             = 50,       # How often to print logs
-    tensorboard_steps       = 50,       # How often to log to tensorboard?
-    image_snapshot_steps    = 1000,     # How often to save image snapshots? None=disable.
-    network_snapshot_steps  = 5000,     # How often to save network snapshots?
-    learning_rate           = 0.001,    # Learning rate
-    l2_lambda               = 1.0,      # L2 loss multiplier factor
-    lpips_lambda            = 0.8,      # LPIPS loss multiplier factor
-    id_lambda               = 0.1,      # ID loss multiplier factor
-    reg_lambda              = 0.0,      # e4e reg loss multiplier factor
-    gan_lambda              = 0.0,      # e4e latent gan loss multiplier factor
-    edit_lambda             = 0.0,      # e4e editability loss multiplier factor
-    random_seed             = 0,        # Global random seed.
-    num_workers             = 3,        # Dataloader workers.
-    resume_pkl              = None,     # Network pickle to resume training from.
-    cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
+    run_dir                 = '.',          # Output directory.
+    rank                    = 0,            # Rank of the current process in [0, num_gpus].
+    model_architecture      = 'base',       # Model architecture type, ['base', 'config-a', 'config-b', 'config-c']
+    dataset_dir             = 'ffhq',       # Train dataset directory
+    num_gpus                = 1,            # Number of GPUs participating in the training.
+    batch_size              = 32,           # Total batch size for one training iteration. Can be larger than batch_gpu * num_gpus.
+    batch_gpu               = 4,            # Number of samples processed at a time by one GPU.
+    generator_pkl           = None,         # Generator pickle to encode.
+    val_dataset_dir         = 'celeba-hq',  # Validation dataset directory
+    training_steps          = 100001,       # Total training batch steps
+    val_steps               = 10000,        # Validation batch steps 
+    print_steps             = 50,           # How often to print logs
+    tensorboard_steps       = 50,           # How often to log to tensorboard?
+    image_snapshot_steps    = 100,          # How often to save image snapshots? None=disable.
+    network_snapshot_steps  = 5000,         # How often to save network snapshots?
+    learning_rate           = 0.001,        # Learning rate
+    l2_lambda               = 1.0,          # L2 loss multiplier factor
+    lpips_lambda            = 0.8,          # LPIPS loss multiplier factor
+    id_lambda               = 0.1,          # ID loss multiplier factor
+    reg_lambda              = 0.0,          # e4e reg loss multiplier factor
+    gan_lambda              = 0.0,          # e4e latent gan loss multiplier factor
+    edit_lambda             = 0.0,          # e4e editability loss multiplier factor
+    random_seed             = 0,            # Global random seed.
+    num_workers             = 3,            # Dataloader workers.
+    resume_pkl              = None,         # Network pickle to resume training from.
+    cudnn_benchmark         = True,         # Enable torch.backends.cudnn.benchmark?
 ):
 
     # initialize
@@ -88,6 +89,8 @@ def training_loop(
         print('Num images: ', len(training_set))
         print('Image shape:', training_set.__getitem__(0)[0].shape)
         print()
+
+    # Load validation set.
 
     # Construct networks.
     if rank == 0:

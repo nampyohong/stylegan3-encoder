@@ -46,12 +46,13 @@ python train.py \
   "batch_size": 32,
   "batch_gpu": 4,
   "generator_pkl": "pretrained/stylegan3-t-ffhq-1024x1024.pkl",
-  "training_steps": 90001,
-  "val_steps": 5000,
+  "val_dataset_dir": null,
+  "training_steps": 100001,
+  "val_steps": 10000,
   "print_steps": 50,
   "tensorboard_steps": 50,
   "image_snapshot_steps": 100,
-  "network_snapshot_steps": 1000,
+  "network_snapshot_steps": 5000,
   "learning_rate": 0.001,
   "l2_lambda": 1.0,
   "lpips_lambda": 0.8,
@@ -64,7 +65,6 @@ python train.py \
   "resume_pkl": null,
   "run_dir": "exp/base/00000-base-ffhq-gpus8-batch32"
 }
-
 ```
 **Learning Curve**
 ![l2loss](./imgs/train_l2.png)
@@ -88,8 +88,8 @@ will be available in few days
 ## TODO
  - [x] Refactoring configuration system
  - [x] Implement resume checkpoint
- - [ ] Implement scripts for Validation, test dataset
- - [ ] Implement demo script
+ - [ ] Implement scripts for test dataset
+ - [ ] Implement demo script for visualize
  - [ ] Train encoder for stylegan3-r generator
  - [ ] Model architecture over parametrization using [Transformer](https://arxiv.org/abs/1706.03762)
  - [ ] Apply L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)

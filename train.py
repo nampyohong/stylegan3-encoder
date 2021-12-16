@@ -31,31 +31,34 @@ from torch_utils import custom_ops
 @click.option('--batch',            help='Total batch size', metavar='INT',                 type=click.IntRange(min=1), required=True)
 @click.option('--generator',        help='Generator pickle to encode',                      required=True) 
 
+# Validate
+@click.option('--valdata',          help='Validation data', metavar='[DIR]',                type=str)
+
 # Training, logging batch steps
 @click.option('--training_steps',   help='Total training steps',                            type=click.IntRange(min=1), default=100001)
-@click.option('--val_steps',        help='Validation batch steps',                          type=click.IntRange(min=1), default=5000)
-@click.option('--print_steps',      help='How often to print logs',                         type=click.IntRange(min=1), default=5000)
-@click.option('--tb_steps',         help='How often to log to tensorboard?',                type=click.IntRange(min=1), default=5000)
-@click.option('--img_snshot_steps', help='How often to save image snapshots?',              type=click.IntRange(min=1), default=5000)
+@click.option('--val_steps',        help='Validation batch steps',                          type=click.IntRange(min=1), default=10000)
+@click.option('--print_steps',      help='How often to print logs',                         type=click.IntRange(min=1), default=50)
+@click.option('--tb_steps',         help='How often to log to tensorboard?',                type=click.IntRange(min=1), default=50)
+@click.option('--img_snshot_steps', help='How often to save image snapshots?',              type=click.IntRange(min=1), default=100)
 @click.option('--net_snshot_steps', help='How often to save network snapshots?',            type=click.IntRange(min=1), default=5000)
 
 # Define Loss
-@click.option('--lr',           help='Learning rate', metavar='FLOAT',                  type=click.FloatRange(min=0), default=0.001, show_default=True)
-@click.option('--l2_lambda',    help='L2 loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=1.0, show_default=True)
-@click.option('--lpips_lambda', help='LPIPS loss multiplier factor', metavar='FLOAT',   type=click.FloatRange(min=0), default=0.8, show_default=True)
-@click.option('--id_lambda',    help='ID loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=0.1, show_default=True)
-@click.option('--reg_lambda',   help='e4e reg loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
-@click.option('--gan_lambda',   help='e4e gan loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
-@click.option('--edit_lambda',  help='e4e editability lambda', metavar='FLOAT',         type=click.FloatRange(min=0), default=0.0, show_default=True)
+@click.option('--lr',               help='Learning rate', metavar='FLOAT',                  type=click.FloatRange(min=0), default=0.001, show_default=True)
+@click.option('--l2_lambda',        help='L2 loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=1.0, show_default=True)
+@click.option('--lpips_lambda',     help='LPIPS loss multiplier factor', metavar='FLOAT',   type=click.FloatRange(min=0), default=0.8, show_default=True)
+@click.option('--id_lambda',        help='ID loss multiplier factor', metavar='FLOAT',      type=click.FloatRange(min=0), default=0.1, show_default=True)
+@click.option('--reg_lambda',       help='e4e reg loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
+@click.option('--gan_lambda',       help='e4e gan loss multiplier factor', metavar='FLOAT', type=click.FloatRange(min=0), default=0.0, show_default=True)
+@click.option('--edit_lambda',      help='e4e editability lambda', metavar='FLOAT',         type=click.FloatRange(min=0), default=0.0, show_default=True)
 
 # Reproducibility
-@click.option('--seed',         help='Random seed', metavar='INT',                      type=click.IntRange(min=0), default=0, show_default=True)
+@click.option('--seed',             help='Random seed', metavar='INT',                      type=click.IntRange(min=0), default=0, show_default=True)
 
 # Dataloader workers
-@click.option('--workers',      help='DataLoader worker processes', metavar='INT',      type=click.IntRange(min=1), default=3, show_default=True)
+@click.option('--workers',          help='DataLoader worker processes', metavar='INT',      type=click.IntRange(min=1), default=3, show_default=True)
 
 # Resume
-@click.option('--resume_pkl',   help='Network pickle to resume training',               default=None, show_default=True)
+@click.option('--resume_pkl',       help='Network pickle to resume training',               default=None, show_default=True)
 
 
 def main(**kwargs):
@@ -71,6 +74,8 @@ def main(**kwargs):
     c.batch_size = opts.batch
     c.batch_gpu = opts.batch // opts.gpus
     c.generator_pkl = opts.generator
+
+    c.val_dataset_dir = opts.valdata
 
     c.training_steps = opts.training_steps
     c.val_steps = opts.val_steps
