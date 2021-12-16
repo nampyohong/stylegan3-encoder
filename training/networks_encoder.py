@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -138,11 +140,21 @@ class Encoder(torch.nn.Module):
     ):
         super(Encoder, self).__init__()
         self.encoder = GradualStyleEncoder() # 50, irse
+        self.resume_step = 0
 
         # load weight
         if pretrained is not None:
-            weights = torch.load(pretrained, map_location='cpu')
-            self.encoder.load_state_dict(weights, strict=True)
+            with open(pretrained, 'rb') as f:
+                dic = pickle.load(f)
+            weights = dic['E']
+            weights_ = dict()
+            for layer in weights:
+                if 'module.encoder' in layer:
+                    weights_['.'.join(layer.split('.')[2:])] = weights[layer]
+            self.resume_step = dic['step']
+            #weights = torch.load(pretrained, map_location='cpu')
+            self.encoder.load_state_dict(weights_, strict=True)
+            del weights
         else:
             irse50 = torch.load("pretrained/model_ir_se50.pth", map_location='cpu')
             weights = {k:v for k,v in irse50.items() if "input_layer" not in k}

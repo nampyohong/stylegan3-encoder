@@ -2,8 +2,8 @@ python train.py \
     --outdir exp/test \
     --encoder base \
     --data data/ffhqs \
-    --gpus 8 \
-    --batch 32 \
+    --gpus 1 \
+    --batch 4 \
     --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
     --training_steps 21 \
     --val_steps 99 \

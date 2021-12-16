@@ -174,12 +174,10 @@ def training_loop(
             snapshot_data = None
             if rank == 0 and cur_step % network_snapshot_steps == 0:
                 print(f"Saving netowrk snapshot at step {cur_step}...")
-                snapshot_data = dict(E=E, G=G)
-                for key, value in snapshot_data.items():
-                    if isinstance(value, torch.nn.Module):
-                        value = copy.deepcopy(value).eval().requires_grad_(False)
-                        snapshot_data[key] = value.cpu()
-                    del value # conserve memory
+                snapshot_data = dict(
+                    E=E.state_dict(),
+                    step=cur_step,
+                )
                 snapshot_pkl = os.path.join(run_dir, 'network_snapshots',f'network-snapshot-{cur_step:06d}.pkl')
                 with open(snapshot_pkl, 'wb') as f:
                     pickle.dump(snapshot_data, f)
