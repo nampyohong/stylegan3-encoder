@@ -94,10 +94,12 @@ def training_loop(
         print('Constructing networks...')
     with dnnlib.util.open_url(generator_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
-    E = DDP(Encoder(pretrained=None).to(device), device_ids=[rank])
 
-    # TODO: Resume from existing pickle.
-    cur_step = 0
+    if resume_pkl is None:
+        E = DDP(Encoder(pretrained=None).to(device), device_ids=[rank])
+    else:
+        E = DDP(Encoder(pretrained=resume_pkl).to(device), device_ids=[rank])
+    cur_step = E.module.resume_step
 
     # Initizlize loss
     if rank == 0:
@@ -174,6 +176,7 @@ def training_loop(
             snapshot_data = None
             if rank == 0 and cur_step % network_snapshot_steps == 0:
                 print(f"Saving netowrk snapshot at step {cur_step}...")
+                # TODO: save lr scheduler, optimizer status, etc...
                 snapshot_data = dict(
                     E=E.state_dict(),
                     step=cur_step,

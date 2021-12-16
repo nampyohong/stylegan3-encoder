@@ -87,8 +87,7 @@ will be available in few days
 
 ## TODO
  - [x] Refactoring configuration system
- - [ ] Fix legacy script to handle encoder snapshot pkl
- - [ ] Implement resume checkpoint, tensorboard log
+ - [x] Implement resume checkpoint
  - [ ] Implement scripts for Validation, test dataset
  - [ ] Implement demo script
  - [ ] Train encoder for stylegan3-r generator

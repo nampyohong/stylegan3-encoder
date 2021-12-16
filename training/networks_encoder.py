@@ -152,7 +152,6 @@ class Encoder(torch.nn.Module):
                 if 'module.encoder' in layer:
                     weights_['.'.join(layer.split('.')[2:])] = weights[layer]
             self.resume_step = dic['step']
-            #weights = torch.load(pretrained, map_location='cpu')
             self.encoder.load_state_dict(weights_, strict=True)
             del weights
         else:

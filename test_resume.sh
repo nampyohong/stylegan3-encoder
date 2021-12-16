@@ -5,7 +5,7 @@ python train.py \
     --gpus 8 \
     --batch 32 \
     --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
-    --training_steps 21 \
+    --training_steps 41 \
     --val_steps 99 \
     --print_steps 5 \
     --tb_steps 5 \
@@ -19,4 +19,5 @@ python train.py \
     --gan_lambda 0.0 \
     --edit_lambda 0.0 \
     --seed 0 \
-    --workers 3
+    --workers 3 \
+    --resume_pkl exp/test/00000-base-ffhqs-gpus8-batch32/network_snapshots/network-snapshot-000020.pkl
