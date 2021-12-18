@@ -35,6 +35,12 @@ python train.py \
     --generator [generator_pkl]
 ```
 
+### Test
+will be available in few days
+```
+python test_inference.py
+```
+
 ## Experiments
 ### Base configuration
 **Train options**
@@ -81,6 +87,12 @@ Encoded image batch G.synthesis(E(X))
 ![encoded1](./imgs/encoded_batch_1.png)
 ![encoded2](./imgs/encoded_batch_2.png)
 ![encoded3](./imgs/encoded_batch_3.png)
+
+**Testset examples(celeba-hq)**  
+Target image
+![target](./imgs/target.png)
+Encoded image
+![encoded](./imgs/encoded.png)
 
 **Encoder checkpoint**  
 will be available in few days
