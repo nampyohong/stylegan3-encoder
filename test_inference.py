@@ -13,7 +13,7 @@ if __name__ == '__main__':
     device = torch.device('cuda:0')
     with dnnlib.util.open_url('pretrained/stylegan3-t-ffhq-1024x1024.pkl') as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
-    pretrained = 'exp/base/00000-base-ffhq-gpus8-batch32/network_snapshots/network-snapshot-100000.pkl'
+    pretrained = 'pretrained/encoder-base-100000.pkl'
     E = Encoder(pretrained=pretrained).to(device)
 
     test_set = ImagesDataset('data/celeba-hq-samples', mode='inference')

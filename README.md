@@ -24,6 +24,20 @@ $ docker attach [container-name]
 $ pip install -v -e .
 ```
 
+### Pretrained weights
+![tree](./imgs/tree_pretrained.png)
+- [encoder pretrained, base configuration](https://drive.google.com/file/d/1dog6vajt_1zUwh_hopxSvQ2ZSWALz71T/view?usp=sharing)
+- [stylegan3, vgg, inception](https://ngc.nvidia.com/catalog/models/nvidia:research:stylegan3)
+- [dlib landmarks detector](https://drive.google.com/file/d/1HKmjg6iXsWr4aFPuU0gBXPGR83wqMzq7/view?usp=sharing)
+- [IR-SE50](https://drive.google.com/file/d/1KW7bjndL3QG3sxBbZxreGHigcCCpsDgn/view?usp=sharing)
+
+### Prepare dataset
+![tree2](./imgs/tree_data.png)
+- [ffhq](https://github.com/NVlabs/ffhq-dataset)
+- [ffhqs - 1000 images sampled from FFHQ, for test](https://drive.google.com/drive/folders/1taHKxS66YKJNhdhiGcEdM6nnE5W9zBb1?usp=sharing)
+- [celeba-hq](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html)
+- [celeba-hq-samples](https://drive.google.com/file/d/1IRIQTaTDn3NGuTauyultlQdYHlIntsBD/view?usp=sharing)
+
 ### Train
 ```
 python train.py \
