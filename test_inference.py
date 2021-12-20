@@ -1,5 +1,6 @@
 import pickle
 
+import numpy as np
 import torch
 
 import dnnlib
@@ -7,6 +8,7 @@ import legacy
 from training.dataset_encoder import ImagesDataset
 from training.networks_encoder import Encoder
 from training.training_loop_encoder import save_image
+from gen_images import make_transform
 
 
 if __name__ == '__main__':
@@ -30,8 +32,18 @@ if __name__ == '__main__':
     print(w.shape)
 
     print('\nsynth: [batch,3,1024,1024]')
-    synth = G.synthesis(E(X))
+    synth = G.synthesis(w)
     print(synth.shape)
 
     save_image(X, 'tmp/target.png', 1, len(test_set), 256, 256)
     save_image(synth, 'tmp/encoded.png', 1, len(test_set), 256, 256)
+
+    # transform
+    x_lst, y_lst = [-0.2, 0.0, 0.2], [-0.1, 0.0, 0.1]
+    for x in x_lst:
+        for y in y_lst:
+            m = make_transform([x,y], 0)
+            m = np.linalg.inv(m)
+            G.synthesis.input.transform.copy_(torch.from_numpy(m))
+            synth = G.synthesis(w)
+            save_image(synth, f'tmp/encoded_transform_x{x}_y{y}.png', 1, len(test_set), 256, 256)

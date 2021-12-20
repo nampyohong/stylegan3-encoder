@@ -107,6 +107,14 @@ Target image
 ![target](./imgs/target.png)
 Encoded image
 ![encoded](./imgs/encoded.png)
+Encoded image, transform x=0.2, y=0
+![x02y00](./imgs/encoded_transform_x0.2_y0.0.png)
+Encoded image, transform x=0.2, y=0.1
+![x02y01](./imgs/encoded_transform_x0.2_y0.1.png)
+Encoded image, transform x=-0.2, y=0.1
+![x-02y01](./imgs/encoded_transform_x-0.2_y0.1.png)
+Encoded image, transform x=-0.2, y=-0.1
+![x-02y-01](./imgs/encoded_transform_x-0.2_y-0.1.png)
 
 ## TODO
  - [x] Refactoring configuration system
