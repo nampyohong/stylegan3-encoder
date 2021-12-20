@@ -1,0 +1,9 @@
+python train.py \
+    --outdir exp/config_a \
+    --encoder transformer \
+    --data data/ffhq \
+    --gpus 8 \
+    --batch 32 \
+    --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
+    --enc_layers 6 \
+    --img_snshot_steps 1000 \
