@@ -34,7 +34,7 @@ class GradualStyleBlock(torch.nn.Module):
 
 
 class GradualStyleEncoder(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, **neck):
         super(GradualStyleEncoder, self).__init__()
         blocks = get_blocks(50) # num_layers=50
         unit_module = bottleneck_IR_SE # 'ir_se' bottleneck
@@ -59,8 +59,6 @@ class GradualStyleEncoder(torch.nn.Module):
         # need some other method for handling w[0]
             # train w[0] separately ?
         # coarse_ind, middle_ind tuning
-        # apply over-parameterization, residual connection in encoder block
-        # apply truncation
         self.style_count = 16
         self.coarse_ind = 3
         self.middle_ind = 7
@@ -75,6 +73,13 @@ class GradualStyleEncoder(torch.nn.Module):
             self.styles.append(style)
         self.latlayer1 = nn.Conv2d(256, 512, kernel_size=1, stride=1, padding=0)
         self.latlayer2 = nn.Conv2d(128, 512, kernel_size=1, stride=1, padding=0)
+
+        self.neck_type, self.neck = None, None
+        if 'neck_type' in neck:
+            if neck['neck_type'] == 'transformer':
+                self.neck_type = 'transformer'
+                assert 'num_encoder_layers' in neck
+                self.neck = nn.Transformer(num_encoder_layers=neck['num_encoder_layers']).encoder
 
     def _upsample_add(self, x, y):
         '''Upsample and add two feature maps.
@@ -122,6 +127,8 @@ class GradualStyleEncoder(torch.nn.Module):
             latents.append(self.styles[j](p1))
 
         out = torch.stack(latents, dim=1)
+        if self.neck is not None:
+            out = self.neck(out)
         return out
 
 
@@ -137,9 +144,10 @@ class Encoder(torch.nn.Module):
     def __init__(
         self,
         pretrained=None,
+        **neck, # None, {'neck_type': 'transformer', 'encoder_layers': 1}
     ):
         super(Encoder, self).__init__()
-        self.encoder = GradualStyleEncoder() # 50, irse
+        self.encoder = GradualStyleEncoder(**neck) # 50, irse
         self.resume_step = 0
 
         # load weight

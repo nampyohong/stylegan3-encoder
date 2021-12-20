@@ -40,7 +40,8 @@ def save_image(images, save_path, gh, gw, H, W):
 def training_loop(
     run_dir                 = '.',          # Output directory.
     rank                    = 0,            # Rank of the current process in [0, num_gpus].
-    model_architecture      = 'base',       # Model architecture type, ['base', 'config-a', 'config-b', 'config-c']
+    model_architecture      = 'base',       # Model architecture type, ['base', 'transformer']
+    num_encoder_layers      = 6,            # Encoder layers if model_architecture is transformer
     dataset_dir             = 'ffhq',       # Train dataset directory
     num_gpus                = 1,            # Number of GPUs participating in the training.
     batch_size              = 32,           # Total batch size for one training iteration. Can be larger than batch_gpu * num_gpus.
@@ -98,10 +99,17 @@ def training_loop(
     with dnnlib.util.open_url(generator_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
 
-    if resume_pkl is None:
-        E = DDP(Encoder(pretrained=None).to(device), device_ids=[rank])
-    else:
-        E = DDP(Encoder(pretrained=resume_pkl).to(device), device_ids=[rank])
+    if model_architecture == 'base':
+        if resume_pkl is None:
+            E = DDP(Encoder(pretrained=None).to(device), device_ids=[rank])
+        else:
+            E = DDP(Encoder(pretrained=resume_pkl).to(device), device_ids=[rank])
+    elif model_architecture == 'transformer':
+        neck = dict(neck_type='transformer', num_encoder_layers=num_encoder_layers)
+        if resume_pkl is None:
+            E = DDP(Encoder(pretrained=None, **neck).to(device), device_ids=[rank])
+        else:
+            E = DDP(Encoder(pretrained=resume_pkl, **neck).to(device), device_ids=[rank])
     cur_step = E.module.resume_step
 
     # Initizlize loss

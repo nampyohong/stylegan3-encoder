@@ -108,18 +108,16 @@ Target image
 Encoded image
 ![encoded](./imgs/encoded.png)
 
-**Encoder checkpoint**  
-will be available in few days
-
 ## TODO
  - [x] Refactoring configuration system
  - [x] Implement resume checkpoint
+ - [x] Implement [Transformer](https://arxiv.org/abs/1706.03762) encoder neck structure
+ - [ ] GPU memory optimization in training loop
  - [ ] Implement scripts for test dataset
- - [ ] Implement demo script for visualize
- - [ ] Train encoder for stylegan3-r generator
- - [ ] Model architecture over parametrization using [Transformer](https://arxiv.org/abs/1706.03762)
- - [ ] Apply L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
+ - [ ] Implement L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
+ - [ ] Colab demo
  - [ ] Apply [hyperstyle](https://github.com/yuval-alaluf/hyperstyle)
+ - [ ] Train encoder for stylegan3-r generator
 
 ## References
 1. [stylegan3](https://github.com/NVlabs/stylegan3)

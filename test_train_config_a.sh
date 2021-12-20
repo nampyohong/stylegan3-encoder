@@ -1,0 +1,24 @@
+python train.py \
+    --outdir exp/test \
+    --encoder transformer \
+    --data data/ffhqs \
+    --gpus 8 \
+    --batch 32 \
+    --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
+    --enc_layers 6 \
+    --valdata data/ffhqs \
+    --training_steps 21 \
+    --val_steps 10 \
+    --print_steps 5 \
+    --tb_steps 5 \
+    --img_snshot_steps 10 \
+    --net_snshot_steps 10 \
+    --lr 0.001 \
+    --l2_lambda 1.0 \
+    --lpips_lambda 0.8 \
+    --id_lambda 0.1 \
+    --reg_lambda 0.0 \
+    --gan_lambda 0.0 \
+    --edit_lambda 0.0 \
+    --seed 0 \
+    --workers 3

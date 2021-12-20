@@ -21,15 +21,15 @@ from torch_utils import custom_ops
 
 # Required.
 @click.option('--outdir',           help='Where to save the results', metavar='DIR',        required=True)
-@click.option('--encoder',          help='Encoder architecture type',                       type=click.Choice(['base','config-a','config-b','config-c']), required=True)
-# TODO
-# config-a : use feature that can present more entire image in w[0]
-# config-b : add transformer after forwarding each gradual style block (over-parametrization)
-# config-c : apply continuous signal interpretation
+# TODO: change name: encoder -> neck
+@click.option('--encoder',          help='Encoder architecture type',                       type=click.Choice(['base','transformer']), required=True)
 @click.option('--data',             help='Training data', metavar='[DIR]',                  type=str, required=True)
 @click.option('--gpus',             help='Number of GPUs to use', metavar='INT',            type=click.IntRange(min=1), required=True)
 @click.option('--batch',            help='Total batch size', metavar='INT',                 type=click.IntRange(min=1), required=True)
 @click.option('--generator',        help='Generator pickle to encode',                      required=True) 
+
+# Transformer encoder layers
+@click.option('--enc_layers',       help='Transformer encoder layers', metavar='INT',       type=click.IntRange(min=1), default=6)
 
 # Validate
 @click.option('--valdata',          help='Validation data', metavar='[DIR]',                type=str)
@@ -74,6 +74,8 @@ def main(**kwargs):
     c.batch_size = opts.batch
     c.batch_gpu = opts.batch // opts.gpus
     c.generator_pkl = opts.generator
+
+    c.num_encoder_layers = opts.enc_layers
 
     c.val_dataset_dir = opts.valdata
 
