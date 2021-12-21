@@ -1,3 +1,4 @@
+import math
 import pickle
 
 import numpy as np
@@ -33,8 +34,59 @@ class GradualStyleBlock(torch.nn.Module):
         return x
 
 
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
+        super().__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+        pe = torch.zeros(max_len, 1, d_model)
+        pe[:, 0, 0::2] = torch.sin(position * div_term)
+        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: Tensor, shape [seq_len, batch_size, embedding_dim]
+        """
+        x = x + self.pe[:x.size(0)]
+        return self.dropout(x)
+
+
+class TransformerBlock(torch.nn.Module):
+    def __init__(self, in_c, out_c, spatial, **styleblock):
+        super(TransformerBlock, self).__init__()
+        self.out_c = out_c
+        self.spatial = spatial
+        self.num_encoder_layers = styleblock['num_encoder_layers']
+        num_pools = int(np.log2(spatial))-4
+        modules = []
+#        modules += [nn.Conv2d(in_c, out_c, kernel_size=3, stride=2, padding=1),
+#                    nn.LeakyReLU()]
+        for i in range(num_pools-1):
+            modules += [
+                nn.Conv2d(out_c, out_c, kernel_size=3, stride=2, padding=1),
+                nn.LeakyReLU()
+            ]
+        self.convs = nn.Sequential(*modules)
+        self.positional_encoding = PositionalEncoding(out_c)
+        self.transformer_encoder = nn.Transformer(num_encoder_layers=self.num_encoder_layers).encoder
+#(out_c, out_c)
+
+    def forward(self, x):
+        x = self.convs(x) # [b,512,H,W]->[b,512,16,16]
+        # (H,W) in [(16,16),(32,32),(64,64)]
+        x = x.view(x.shape[0], -1, self.out_c) # [b,256,512]
+        x = self.positional_encoding(x)
+        x = self.transformer_encoder(x)[:,0,:]
+        return x
+
+
 class GradualStyleEncoder(torch.nn.Module):
-    def __init__(self, **neck):
+    def __init__(self, **styleblock):
         super(GradualStyleEncoder, self).__init__()
         blocks = get_blocks(50) # num_layers=50
         unit_module = bottleneck_IR_SE # 'ir_se' bottleneck
@@ -63,23 +115,26 @@ class GradualStyleEncoder(torch.nn.Module):
         self.coarse_ind = 3
         self.middle_ind = 7
 
-        for i in range(self.style_count):
-            if i < self.coarse_ind:
-                style = GradualStyleBlock(512, 512, 16)
-            elif i < self.middle_ind:
-                style = GradualStyleBlock(512, 512, 32)
-            else:
-                style = GradualStyleBlock(512, 512, 64)
-            self.styles.append(style)
+        if 'arch' in styleblock:
+            for i in range(self.style_count):
+                if i < self.coarse_ind:
+                    style = TransformerBlock(512, 512, 16, **styleblock)
+                elif i < self.middle_ind:
+                    style = TransformerBlock(512, 512, 32, **styleblock)
+                else:
+                    style = TransformerBlock(512, 512, 64, **styleblock)
+                self.styles.append(style)
+        else:
+            for i in range(self.style_count):
+                if i < self.coarse_ind:
+                    style = GradualStyleBlock(512, 512, 16)
+                elif i < self.middle_ind:
+                    style = GradualStyleBlock(512, 512, 32)
+                else:
+                    style = GradualStyleBlock(512, 512, 64)
+                self.styles.append(style)
         self.latlayer1 = nn.Conv2d(256, 512, kernel_size=1, stride=1, padding=0)
         self.latlayer2 = nn.Conv2d(128, 512, kernel_size=1, stride=1, padding=0)
-
-        self.neck_type, self.neck = None, None
-        if 'neck_type' in neck:
-            if neck['neck_type'] == 'transformer':
-                self.neck_type = 'transformer'
-                assert 'num_encoder_layers' in neck
-                self.neck = nn.Transformer(num_encoder_layers=neck['num_encoder_layers']).encoder
 
     def _upsample_add(self, x, y):
         '''Upsample and add two feature maps.
@@ -127,8 +182,9 @@ class GradualStyleEncoder(torch.nn.Module):
             latents.append(self.styles[j](p1))
 
         out = torch.stack(latents, dim=1)
-        if self.neck is not None:
-            out = self.neck(out)
+#       Adding Transformer structure in this results in gradient exploding
+#        if self.neck is not None:
+#            out = self.neck(out)
         return out
 
 

@@ -5,7 +5,7 @@ python train.py \
     --gpus 8 \
     --batch 32 \
     --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
-    --enc_layers 6 \
+    --enc_layers 1 \
     --valdata data/ffhqs \
     --training_steps 21 \
     --val_steps 10 \

@@ -119,10 +119,11 @@ Encoded image, transform x=-0.2, y=-0.1
 ## TODO
  - [x] Refactoring configuration system
  - [x] Implement resume checkpoint
- - [x] Implement [Transformer](https://arxiv.org/abs/1706.03762) encoder neck structure
+ - [x] Apply [Transformer](https://arxiv.org/abs/1706.03762) encoder instead of convs in GradualStyleBlock
+ - [ ] Taining delta w from avg latent w_avg
+ - [ ] Add L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
  - [ ] GPU memory optimization in training loop
  - [ ] Implement scripts for test dataset
- - [ ] Implement L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
  - [ ] Colab demo
  - [ ] Apply [hyperstyle](https://github.com/yuval-alaluf/hyperstyle)
  - [ ] Train encoder for stylegan3-r generator
@@ -130,3 +131,4 @@ Encoded image, transform x=-0.2, y=-0.1
 ## References
 1. [stylegan3](https://github.com/NVlabs/stylegan3)
 2. [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel)
+3. [e4e](https://github.com/omertov/encoder4editing)
