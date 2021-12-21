@@ -119,11 +119,11 @@ Encoded image, transform x=-0.2, y=-0.1
 ## TODO
  - [x] Refactoring configuration system
  - [x] Implement resume checkpoint
- - [x] Apply [Transformer](https://arxiv.org/abs/1706.03762) encoder instead of convs in GradualStyleBlock -> CNN GradualStyleBlock is better than transformer // discarded
- - [ ] Taining delta w from avg latent w_avg (G.mapping.w_avg)
+ - [x] Apply [Transformer](https://arxiv.org/abs/1706.03762) encoder instead of convs in GradualStyleBlock(Config-a) -> CNN GradualStyleBlock is better than transformer // discarded
+ - [x] Taining delta w from avg latent w_avg (G.mapping.w_avg) -> Training Config-b now, not use regularization loss, same as psp paper
+ - [ ] Implement scripts for test dataset
  - [ ] Add L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
  - [ ] GPU memory optimization in training loop
- - [ ] Implement scripts for test dataset
  - [ ] Colab demo
  - [ ] Apply [hyperstyle](https://github.com/yuval-alaluf/hyperstyle)
  - [ ] Train encoder for stylegan3-r generator

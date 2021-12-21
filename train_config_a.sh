@@ -1,3 +1,4 @@
+# use transformer encoder instead of gradual style block CNN architecture -> discarded
 python train.py \
     --outdir exp/config_a \
     --encoder transformer \

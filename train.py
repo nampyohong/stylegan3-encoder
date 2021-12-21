@@ -27,7 +27,8 @@ from torch_utils import custom_ops
 @click.option('--batch',            help='Total batch size', metavar='INT',                 type=click.IntRange(min=1), required=True)
 @click.option('--generator',        help='Generator pickle to encode',                      required=True) 
 
-# Transformer encoder layers
+# Encoder settings
+@click.option('--w_avg',            help='Train delta w from w_avg',                        is_flag=True)
 @click.option('--enc_layers',       help='Transformer encoder layers', metavar='INT',       type=click.IntRange(min=1), default=1)
 
 # Validate
@@ -74,6 +75,7 @@ def main(**kwargs):
     c.batch_gpu = opts.batch // opts.gpus
     c.generator_pkl = opts.generator
 
+    c.w_avg = opts.w_avg
     c.num_encoder_layers = opts.enc_layers
 
     c.val_dataset_dir = opts.valdata

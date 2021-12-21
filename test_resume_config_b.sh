@@ -1,0 +1,25 @@
+python train.py \
+    --outdir exp/test \
+    --encoder base \
+    --data data/ffhqs \
+    --gpus 8 \
+    --batch 32 \
+    --generator pretrained/stylegan3-t-ffhq-1024x1024.pkl \
+    --w_avg \
+    --valdata data/ffhqs \
+    --training_steps 41 \
+    --val_steps 99 \
+    --print_steps 5 \
+    --tb_steps 5 \
+    --img_snshot_steps 10 \
+    --net_snshot_steps 10 \
+    --lr 0.001 \
+    --l2_lambda 1.0 \
+    --lpips_lambda 0.8 \
+    --id_lambda 0.1 \
+    --reg_lambda 0.0 \
+    --gan_lambda 0.0 \
+    --edit_lambda 0.0 \
+    --seed 0 \
+    --workers 3 \
+    --resume_pkl exp/test/00000-base-ffhqs-gpus8-batch32/network_snapshots/network-snapshot-000020.pkl

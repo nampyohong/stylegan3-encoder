@@ -41,6 +41,7 @@ def training_loop(
     run_dir                 = '.',          # Output directory.
     rank                    = 0,            # Rank of the current process in [0, num_gpus].
     model_architecture      = 'base',       # Model architecture type, ['base', 'transformer']
+    w_avg                   = False,        # Train delta w from w_avg
     num_encoder_layers      = 1,            # Encoder layers if model_architecture is transformer
     dataset_dir             = 'ffhq',       # Train dataset directory
     num_gpus                = 1,            # Number of GPUs participating in the training.
@@ -99,17 +100,20 @@ def training_loop(
     with dnnlib.util.open_url(generator_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
 
+    latent_avg = None
+    if w_avg:
+        latent_avg = G.mapping.w_avg
     if model_architecture == 'base':
         if resume_pkl is None:
-            E = DDP(Encoder(pretrained=None).to(device), device_ids=[rank])
+            E = DDP(Encoder(pretrained=None,w_avg=latent_avg).to(device), device_ids=[rank])
         else:
-            E = DDP(Encoder(pretrained=resume_pkl).to(device), device_ids=[rank])
+            E = DDP(Encoder(pretrained=resume_pkl,w_avg=latent_avg).to(device), device_ids=[rank])
     elif model_architecture == 'transformer':
         styleblock = dict(arch='transformer', num_encoder_layers=num_encoder_layers)
         if resume_pkl is None:
-            E = DDP(Encoder(pretrained=None, **styleblock).to(device), device_ids=[rank])
+            E = DDP(Encoder(pretrained=None, w_avg=latent_avg, **styleblock).to(device), device_ids=[rank])
         else:
-            E = DDP(Encoder(pretrained=resume_pkl, **styleblock).to(device), device_ids=[rank])
+            E = DDP(Encoder(pretrained=resume_pkl, w_avg=latent_avg, **styleblock).to(device), device_ids=[rank])
     cur_step = E.module.resume_step
 
     # Initizlize loss

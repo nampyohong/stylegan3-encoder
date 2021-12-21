@@ -200,11 +200,13 @@ class Encoder(torch.nn.Module):
     def __init__(
         self,
         pretrained=None,
-        **neck, # None, {'neck_type': 'transformer', 'encoder_layers': 1}
+        w_avg=None,
+        **kwargs, 
     ):
         super(Encoder, self).__init__()
-        self.encoder = GradualStyleEncoder(**neck) # 50, irse
+        self.encoder = GradualStyleEncoder(**kwargs) # 50, irse
         self.resume_step = 0
+        self.w_avg = w_avg
 
         # load weight
         if pretrained is not None:
@@ -224,4 +226,9 @@ class Encoder(torch.nn.Module):
             self.encoder.load_state_dict(weights, strict=False)
 
     def forward(self, img):
-        return self.encoder(img)
+        if self.w_avg is None:
+            return self.encoder(img)
+        else: # train delta_w, from w_avg
+            delta_w = self.encoder(img)
+            w = delta_w + self.w_avg.repeat(delta_w.shape[0],1,1)
+            return w
