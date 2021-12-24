@@ -50,9 +50,12 @@ python train.py \
 ```
 
 ### Test
-will be available in few days
 ```
-python test_inference.py
+python test.py \
+    --testdir exp/[train_exp]/[train_exp_subdir] \
+    --data data/[dataset_name] \
+    --gpus [num_gpus] \
+    --batch [total_batch_size]
 ```
 
 ## Experiments
