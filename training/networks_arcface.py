@@ -1,7 +1,7 @@
 from collections import namedtuple
 import torch
 from torch.nn import Conv2d, BatchNorm2d, PReLU, ReLU, Sigmoid, MaxPool2d, AdaptiveAvgPool2d, Sequential, Module
-
+import pdb
 """
 ArcFace implementation from [TreB1eN](https://github.com/TreB1eN/InsightFace_Pytorch)
 """
@@ -49,6 +49,10 @@ def get_blocks(num_layers):
         ]
     else:
         raise ValueError("Invalid number of layers: {}. Must be one of [50, 100, 152]".format(num_layers))
+
+    # pdb.set_trace()
+    # num_layers -- 50
+
     return blocks
 
 
@@ -60,6 +64,9 @@ class SEModule(Module):
         self.relu = ReLU(inplace=True)
         self.fc2 = Conv2d(channels // reduction, channels, kernel_size=1, padding=0, bias=False)
         self.sigmoid = Sigmoid()
+        # pdb.set_trace()
+        # channels = 64
+        # reduction = 16
 
     def forward(self, x):
         module_input = x
@@ -86,6 +93,7 @@ class bottleneck_IR(Module):
             Conv2d(in_channel, depth, (3, 3), (1, 1), 1, bias=False), PReLU(depth),
             Conv2d(depth, depth, (3, 3), stride, 1, bias=False), BatchNorm2d(depth)
         )
+        pdb.set_trace()
 
     def forward(self, x):
         shortcut = self.shortcut_layer(x)
@@ -111,6 +119,10 @@ class bottleneck_IR_SE(Module):
             BatchNorm2d(depth),
             SEModule(depth, 16)
         )
+        # pdb.set_trace()
+        # in_channel = 64
+        # depth = 64
+        # stride = 2
 
     def forward(self, x):
         shortcut = self.shortcut_layer(x)
