@@ -11,6 +11,8 @@ def get_model():
     checkpoint = model_path if cdir == "" else cdir + "/" + model_path
 
     model = encoder.GradualStyleEncoder()
+    # model.load_state_dict(torch.load(checkpoint, map_location='cpu'))
     model.load_state_dict(torch.load(checkpoint))
+
     model = model.eval()
     return model

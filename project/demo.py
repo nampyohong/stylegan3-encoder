@@ -6,9 +6,11 @@ if __name__ == '__main__':
     from torchsummary import summary
 
     device = torch.device("cuda:0")
+    # device = torch.device("cpu")
+
     model = stylegan3_encoder.get_model()
     model = model.to(device)
-    summary(model, (3, 256, 256))
+    summary(model, (3, 256, 256), device=device.type)
 
     input_tensor = torch.randn(1, 3, 256, 256).to(device)
     start_time = time.time()
