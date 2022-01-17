@@ -1,3 +1,4 @@
+import os
 import pickle
 
 import numpy as np
@@ -15,8 +16,11 @@ if __name__ == '__main__':
     device = torch.device('cuda:0')
     with dnnlib.util.open_url('pretrained/stylegan3-t-ffhq-1024x1024.pkl') as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
+    G = G.eval()
+
     pretrained = 'pretrained/encoder-base-100000.pkl'
     E = Encoder(pretrained=pretrained).to(device)
+    E = E.eval()
 
     test_set = ImagesDataset('data/celeba-hq-samples', mode='inference')
     test_loader = torch.utils.data.DataLoader(dataset=test_set, batch_size=len(test_set))
@@ -28,15 +32,25 @@ if __name__ == '__main__':
     print(X.shape)
 
     print('\nlatent: [batch,16,512]')
-    w = E(X)
+    with torch.no_grad():
+        w = E(X)
     print(w.shape)
 
     print('\nsynth: [batch,3,1024,1024]')
-    synth = G.synthesis(w)
+    with torch.no_grad():
+        synth = G.synthesis(w)
     print(synth.shape)
+
+    # Create tmp directory to store results
+    if not os.path.exists("tmp"):
+        os.makedirs("tmp")
 
     save_image(X, 'tmp/target.png', 1, len(test_set), 256, 256)
     save_image(synth, 'tmp/encoded.png', 1, len(test_set), 256, 256)
+
+    del X
+    del synth
+    torch.cuda.empty_cache()
 
     # transform
     x_lst, y_lst = [-0.2, 0.0, 0.2], [-0.1, 0.0, 0.1]
@@ -45,5 +59,8 @@ if __name__ == '__main__':
             m = make_transform([x,y], 0)
             m = np.linalg.inv(m)
             G.synthesis.input.transform.copy_(torch.from_numpy(m))
-            synth = G.synthesis(w)
+            with torch.no_grad():
+                synth = G.synthesis(w)
             save_image(synth, f'tmp/encoded_transform_x{x}_y{y}.png', 1, len(test_set), 256, 256)
+            del synth
+            torch.cuda.empty_cache()            
