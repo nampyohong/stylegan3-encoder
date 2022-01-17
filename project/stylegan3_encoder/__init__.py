@@ -2,6 +2,7 @@ import os
 import torch
 from . import encoder
 
+__version__ = "1.0.0"
 
 def get_model():
     """Create model."""
