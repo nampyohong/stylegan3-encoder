@@ -24,6 +24,7 @@ from training.training_loop_encoder import save_image
 
 #----------------------------------------------------------------------------
 
+@torch.no_grad()
 def testing_loop(
     test_dir                = '.',          # Output directory.
     rank                    = 0,            # Rank of the current process in [0, num_gpus].
@@ -141,15 +142,12 @@ def testing_loop(
             for k in epoch_loss_dict:
                 epoch_loss_dict[k] += loss_dict[k]
 
-            del loss
-            del loss_dict
-    
             # barrier
             torch.distributed.barrier()
             torch.cuda.empty_cache()
     
             # Save image snapshot.
-            if rank == 0 and batch_idx == len(testing_loader)-1:
+            if rank == 0 and batch_idx == 0:
                 print(f"Saving image samples...")
                 gh, gw = 1, batch_gpu
                 H,W = real_images.shape[2], real_images.shape[3]
@@ -171,6 +169,8 @@ def testing_loop(
                 logger.add_scalar(f'test/{key}', epoch_loss_dict[key], cur_step)
         # barrier
         torch.distributed.barrier()
+
+        del E
 
     # Done.
     torch.distributed.destroy_process_group()
