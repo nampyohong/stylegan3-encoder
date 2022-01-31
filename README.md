@@ -1,9 +1,8 @@
 # stylegan3-encoder
 
 ## Introduction
-Training e4e version encoder is being delayed because there is no available gpu for me 😢
-It will be released no later than January 28th, so please wait!
-
+E4E version encoder is currently being trained. It will be released soon!  
+  
 Encoder implementation for image inversion task of stylegan3 generator ([Alias Free GAN](https://github.com/NVlabs/stylegan3)).  
 The neural network architecture and hyper-parameter settings of the base configuration is almost the same as that of [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel), and various settings of improved encoder architecture will be added in the future.  
 For fast training, pytorch DistibutedDataParallel is used.  
