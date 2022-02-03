@@ -2,6 +2,7 @@
 *.pth
 *.pkl
 *.dat
+*.pt
 tmp/
 exp/
 old/

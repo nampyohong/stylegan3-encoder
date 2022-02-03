@@ -1,11 +1,11 @@
 # stylegan3-encoder
 
 ## Introduction
-E4E version encoder is currently being trained. It will be released soon!  
-  
 Encoder implementation for image inversion task of stylegan3 generator ([Alias Free GAN](https://github.com/NVlabs/stylegan3)).  
 The neural network architecture and hyper-parameter settings of the base configuration is almost the same as that of [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel), and various settings of improved encoder architecture will be added in the future.  
 For fast training, pytorch DistibutedDataParallel is used.  
+
+Please see this repo for further research ([Stylegan3-edit](https://github.com/yuval-alaluf/stylegan3-editing)).
 
 ## Installation
 
@@ -121,19 +121,6 @@ Encoded image, transform x=-0.2, y=0.1
 Encoded image, transform x=-0.2, y=-0.1
 ![x-02y-01](./imgs/encoded_transform_x-0.2_y-0.1.png)
 
-## TODO
- - [x] Refactoring configuration system
- - [x] Implement resume checkpoint
- - [x] Apply [Transformer](https://arxiv.org/abs/1706.03762) encoder instead of convs in GradualStyleBlock(Config-a) -> CNN GradualStyleBlock is better than transformer // discarded
- - [x] Taining delta w from avg latent w_avg (G.mapping.w_avg) -> Training Config-b now, not use regularization loss, same as psp paper
- - [ ] Add L2 delta-regularization loss and GAN loss(latent discriminator), [e4e](https://arxiv.org/abs/2102.02766)
- - [ ] Add metrics for test, FID, [Precision and Recall](https://arxiv.org/abs/1806.00035), [Fidelity and Diversity](https://arxiv.org/abs/2002.09797)
- - [ ] GPU memory optimization
- - [ ] Colab demo
- - [ ] Apply [hyperstyle](https://github.com/yuval-alaluf/hyperstyle)
- - [ ] Train encoder for stylegan3-r generator
-
 ## References
 1. [stylegan3](https://github.com/NVlabs/stylegan3)
 2. [pixel2style2pixel](https://github.com/eladrich/pixel2style2pixel)
-3. [e4e](https://github.com/omertov/encoder4editing)
