@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 from training.networks_arcface import get_blocks, bottleneck_IR_SE
-
+import pdb
 
 class GradualStyleBlock(torch.nn.Module):
     def __init__(self, in_c, out_c, spatial):
@@ -14,6 +14,7 @@ class GradualStyleBlock(torch.nn.Module):
         self.out_c = out_c
         self.spatial = spatial
         num_pools = int(np.log2(spatial))
+        # num_pools -- 4
         modules = []
         modules += [nn.Conv2d(in_c, out_c, kernel_size=3, stride=2, padding=1),
                     nn.LeakyReLU()]
@@ -24,6 +25,22 @@ class GradualStyleBlock(torch.nn.Module):
             ]
         self.convs = nn.Sequential(*modules)
         self.linear = nn.Linear(out_c, out_c)
+        # self = GradualStyleBlock(
+        #   (convs): Sequential(
+        #     (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        #     (1): LeakyReLU(negative_slope=0.01)
+        #     (2): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        #     (3): LeakyReLU(negative_slope=0.01)
+        #     (4): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        #     (5): LeakyReLU(negative_slope=0.01)
+        #     (6): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        #     (7): LeakyReLU(negative_slope=0.01)
+        #   )
+        #   (linear): Linear(in_features=512, out_features=512, bias=True)
+        # )
+        # in_c = 512
+        # out_c = 512
+        # spatial = 16
 
     def forward(self, x):
         x = self.convs(x) # [b,512,H,W]->[b,512,1,1]
@@ -63,6 +80,8 @@ class TransformerBlock(torch.nn.Module):
         self.spatial = spatial
         self.num_encoder_layers = styleblock['num_encoder_layers']
         num_pools = int(np.log2(spatial))-4
+        pdb.set_trace()
+
         modules = []
 #        modules += [nn.Conv2d(in_c, out_c, kernel_size=3, stride=2, padding=1),
 #                    nn.LeakyReLU()]
@@ -115,6 +134,7 @@ class GradualStyleEncoder(torch.nn.Module):
         self.coarse_ind = 3
         self.middle_ind = 7
 
+        # pp styleblock -- {}
         if 'arch' in styleblock:
             for i in range(self.style_count):
                 if i < self.coarse_ind:
@@ -125,6 +145,7 @@ class GradualStyleEncoder(torch.nn.Module):
                     style = TransformerBlock(512, 512, 64, **styleblock)
                 self.styles.append(style)
         else:
+            # self.style_count -- 16
             for i in range(self.style_count):
                 if i < self.coarse_ind:
                     style = GradualStyleBlock(512, 512, 16)
@@ -204,21 +225,31 @@ class Encoder(torch.nn.Module):
         **kwargs, 
     ):
         super(Encoder, self).__init__()
+        # self = Encoder()
+        # pretrained = 'pretrained/encoder-base-100000.pkl'
+        # w_avg = None
+        # kwargs = {}
+
         self.encoder = GradualStyleEncoder(**kwargs) # 50, irse
         self.resume_step = 0
         self.w_avg = w_avg
 
         # load weight
+        # pretrained -- 'pretrained/encoder-base-100000.pkl'
         if pretrained is not None:
             with open(pretrained, 'rb') as f:
                 dic = pickle.load(f)
             weights = dic['E']
             weights_ = dict()
+
             for layer in weights:
                 if 'module.encoder' in layer:
                     weights_['.'.join(layer.split('.')[2:])] = weights[layer]
+
+            # layer -- 'module.encoder.latlayer2.bias'
             self.resume_step = dic['step']
             self.encoder.load_state_dict(weights_, strict=True)
+            # torch.save(self.encoder.state_dict(), "/tmp/stylegan3_encoder.pth")
             del weights
         else:
             irse50 = torch.load("pretrained/model_ir_se50.pth", map_location='cpu')
@@ -226,6 +257,7 @@ class Encoder(torch.nn.Module):
             self.encoder.load_state_dict(weights, strict=False)
 
     def forward(self, img):
+        # self.w_avg == None
         if self.w_avg is None:
             return self.encoder(img)
         else: # train delta_w, from w_avg
